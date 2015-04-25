@@ -2,6 +2,6 @@
 # Then run pod install
 
 target 'ProjectName' do
-    pod 'LightningClient', :git => 'git@github.com:macdabby/LightningiOSClient.git'
+    pod 'LightningClient', :git => 'git@github.com:macdabby/LightningObjectiveCClient.git'
 end
 
