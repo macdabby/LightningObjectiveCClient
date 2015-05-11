@@ -19,7 +19,9 @@
 +(void) configure: (NSString *)url;
 +(void) configure: (NSString *)url debug: (Boolean)debugOn;
 +(void) setSessionKey: (NSString *)sessionKey;
++(NSDictionary *) POST: (NSString *) url;
 +(NSDictionary *) POST: (NSString *) url params: (NSDictionary *) params;
++(NSDictionary *) GET: (NSString *) url;
 +(NSDictionary *) GET: (NSString *) url params: (NSDictionary *) params;
 
 @end

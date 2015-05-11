@@ -53,10 +53,10 @@ static Boolean debug;
 }
 
 +(NSDictionary *) GET: (NSString *) url params: (NSDictionary *) params {
-    return [Lightning send:@"POST" url:url params:params];
+    return [Lightning send:@"GET" url:url params:params];
 }
 +(NSDictionary *) GET: (NSString *) url {
-    return [Lightning send:@"POST" url:url params:@{}];
+    return [Lightning send:@"GET" url:url params:@{}];
 }
 +(NSDictionary *) POST: (NSString *) url params: (NSDictionary *) params {
     return [Lightning send:@"POST" url:url params:params];
