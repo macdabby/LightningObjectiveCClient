@@ -23,5 +23,6 @@
 +(NSDictionary *) POST: (NSString *) url params: (NSDictionary *) params;
 +(NSDictionary *) GET: (NSString *) url;
 +(NSDictionary *) GET: (NSString *) url params: (NSDictionary *) params;
++(NSDictionary *) POST: (NSString *) url JSON: (NSDictionary *) json;
 
 @end

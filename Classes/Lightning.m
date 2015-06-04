@@ -37,32 +37,47 @@ static Boolean debug;
     sessionKey = [defaults objectForKey:@"Lightning.SessionKey"];
 }
 
-+(NSDictionary *) send: (NSString *) method url: (NSString *) urlString params: (NSDictionary *) params {
-    NSURL *url = [NSURL URLWithString:urlString relativeToURL:baseURL];
-
++(NSDictionary *) send: (NSString *) method url: (NSURL *) url body: (NSData *) body {
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:url];
-    NSString *cookieFormat = debug ? @"%@=%@&XDEBUG_SESSION_START=PHPSTORM;" : @"%@=%@;";
+    NSString *cookieFormat = debug ? @"session=%@; XDEBUG_SESSION=PHPSTORM;" : @"%@=%@;";
     [request setValue:[NSString stringWithFormat:cookieFormat, @"session", sessionKey] forHTTPHeaderField:@"Cookie"];
-    [request setHTTPMethod:@"POST"];
-    [request setHTTPBody:[[self serializeParams:params] dataUsingEncoding:NSUTF8StringEncoding]];
+    [request setHTTPMethod:method];
+    if (body != nil) {
+        [request setHTTPBody:body];
+    }
 
-    // TODO: This should also read the cookie to see if they were logged out.
-    NSData * data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
-
-    return [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+    @try {
+        // TODO: This should also read the cookie to see if they were logged out.
+        NSData * data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
+        return [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+    }
+    @catch (NSException *e) {
+        return nil;
+    }
 }
 
 +(NSDictionary *) GET: (NSString *) url params: (NSDictionary *) params {
-    return [Lightning send:@"GET" url:url params:params];
+    NSData *queryString = [[self serializeParams:params] dataUsingEncoding:NSUTF8StringEncoding];
+    NSURL *fullUrl = [NSURL URLWithString:url relativeToURL:baseURL];
+    NSURLComponents *components = [[NSURLComponents alloc] initWithString:[fullUrl absoluteString]];
+    [components setQuery: [[NSString alloc] initWithData:queryString encoding:NSUTF8StringEncoding]];
+    return [Lightning send:@"GET" url:fullUrl body:nil];
 }
 +(NSDictionary *) GET: (NSString *) url {
-    return [Lightning send:@"GET" url:url params:@{}];
+    NSURL *fullUrl = [NSURL URLWithString:url relativeToURL:baseURL];
+    return [Lightning send:@"GET" url:fullUrl body:nil];
 }
 +(NSDictionary *) POST: (NSString *) url params: (NSDictionary *) params {
-    return [Lightning send:@"POST" url:url params:params];
+    NSURL *fullUrl = [NSURL URLWithString:url relativeToURL:baseURL];
+    return [Lightning send:@"POST" url:fullUrl body:[[self serializeParams:params] dataUsingEncoding:NSUTF8StringEncoding]];
 }
 +(NSDictionary *) POST: (NSString *) url {
-    return [Lightning send:@"POST" url:url params:@{}];
+    NSURL *fullUrl = [NSURL URLWithString:url relativeToURL:baseURL];
+    return [Lightning send:@"POST" url:fullUrl body:nil];
+}
++(NSDictionary *) POST: (NSString *) url JSON: (NSDictionary *) json {
+    NSURL *fullUrl = [NSURL URLWithString:url relativeToURL:baseURL];
+    return [Lightning send:@"POST" url:fullUrl body:[NSJSONSerialization dataWithJSONObject:json options:0 error:nil]];
 }
 
 // Copied from stack overflow:
