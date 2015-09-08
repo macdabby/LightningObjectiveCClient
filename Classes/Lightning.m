@@ -22,6 +22,12 @@ static Boolean debug;
     [defaults synchronize];
 }
 
+// Get the user's session key.
++(NSString *) getSessionKey {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    return [defaults objectForKey:@"Lightning.SessionKey"];
+}
+
 +(void) configure: (NSString *)url {
     [self configure: url debug: false];
 }
@@ -39,8 +45,9 @@ static Boolean debug;
 
 +(NSDictionary *) send: (NSString *) method url: (NSURL *) url body: (NSData *) body {
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:url];
-    NSString *cookieFormat = debug ? @"session=%@; XDEBUG_SESSION=PHPSTORM;" : @"%@=%@;";
-    [request setValue:[NSString stringWithFormat:cookieFormat, @"session", sessionKey] forHTTPHeaderField:@"Cookie"];
+    NSString *cookieFormat = debug ? @"%@=%@; XDEBUG_SESSION=PHPSTORM;" : @"%@=%@;";
+    NSString *cookieValue = [NSString stringWithFormat:cookieFormat, @"session", sessionKey];
+    [request setValue:cookieValue forHTTPHeaderField:@"Cookie"];
     [request setHTTPMethod:method];
     if (body != nil) {
         [request setHTTPBody:body];
